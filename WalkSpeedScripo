@@ -1,0 +1,158 @@
+local NothingLibrary = loadstring(game:HttpGetAsync('https://raw.githubusercontent.com/3345-c-a-t-s-u-s/NOTHING/main/source.lua'))();
+local Notification = NothingLibrary.Notification();
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+-- Notification ตัวอย่าง
+Notification.new({
+	Title = "Malware-free",
+	Description = "UI พร้อมใช้งาน",
+	Duration = 5,
+	Icon = "rbxassetid://8997385628"
+})
+
+-- สร้างหน้าต่างหลัก
+local Windows = NothingLibrary.new({
+	Title = "Malware-free",
+	Description = "Malware-free UI Library",
+	Keybind = Enum.KeyCode.LeftControl,
+	Logo = 'http://www.roblox.com/asset/?id=18898582662'
+})
+
+-- ===================== แท็บ ESP =====================
+local ESPTab = Windows:NewTab({Title = "มองESP👁️", Description = "ระบบ ESP", Icon = "rbxassetid://6031075931"})
+local ESPSection = ESPTab:NewSection({Title = "ระบบ ESP", Icon = "rbxassetid://6031075931", Position = "Left"})
+
+-- ตัวแปร ESP
+local ESP_Enabled = false
+local ESPGuiPool = {}
+
+-- ฟังก์ชันตรวจอาวุธ + ความแรร์ + ประเภท
+local function getWeaponEmoji(character)
+	if not character then return "🤵", Color3.fromRGB(255,255,255) end
+
+	local tool = nil
+	for _, t in ipairs(character:GetChildren()) do
+		if t:IsA("Tool") then
+			tool = t
+			break
+		end
+	end
+
+	if not tool then
+		return "🤵", Color3.fromRGB(255,255,255)
+	end
+
+	local rarity = tool:GetAttribute("Rarity") or "Common"
+	local emoji = "🗡️" 
+	local color = Color3.fromRGB(255,255,255)
+
+	local toolName = tool.Name:lower()
+	if string.find(toolName,"gun") or string.find(toolName,"pistol") or string.find(toolName,"rifle") then
+		emoji = "🔫"
+	end
+
+	if rarity == "Common" then color = Color3.fromRGB(255,255,255)
+	elseif rarity == "Uncommon" then color = Color3.fromRGB(0,255,0)
+	elseif rarity == "Rare" then color = Color3.fromRGB(0,0,255)
+	elseif rarity == "Epic" then color = Color3.fromRGB(128,0,128)
+	elseif rarity == "Legendary" then color = Color3.fromRGB(255,255,0)
+	elseif rarity == "Mythic" then color = Color3.fromRGB(255,0,0)
+	end
+
+	return emoji .. (rarity == "Common" and "⚪" or
+		rarity == "Uncommon" and "🟢" or
+		rarity == "Rare" and "🔵" or
+		rarity == "Epic" and "🟣" or
+		rarity == "Legendary" and "🟡" or
+		rarity == "Mythic" and "🔴"
+	), color
+end
+
+-- Toggle เปิด/ปิด ESP
+ESPSection:NewToggle({
+	Title = "เปิดระบบ ESP",
+	Default = false,
+	Callback = function(state)
+		ESP_Enabled = state
+		if not state then
+			for _, guiData in pairs(ESPGuiPool) do
+				pcall(function() guiData.Billboard:Destroy() end)
+			end
+			ESPGuiPool = {}
+		end
+	end
+})
+
+-- ฟังก์ชันสร้าง ESP
+local function CreateESP(player)
+	if ESPGuiPool[player] then return end
+	local character = player.Character
+	if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+
+	local root = character.HumanoidRootPart
+	local billboard = Instance.new("BillboardGui")
+	billboard.Size = UDim2.new(0,20,0,20) 
+	billboard.Adornee = root
+	billboard.AlwaysOnTop = true
+	billboard.StudsOffset = Vector3.new(0,1,0)
+	billboard.Parent = game.CoreGui
+
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.new(1,0,1,0)
+	label.BackgroundTransparency = 1
+	label.TextScaled = true
+	label.Font = Enum.Font.GothamBold
+	label.TextStrokeTransparency = 0.5
+	label.Parent = billboard
+
+	RunService.RenderStepped:Connect(function()
+		if not ESP_Enabled then return end
+		if character and character:FindFirstChild("HumanoidRootPart") then
+			local emoji, color = getWeaponEmoji(character)
+			label.Text = emoji
+			label.TextColor3 = color
+		end
+	end)
+
+	ESPGuiPool[player] = {Billboard = billboard, Label = label}
+end
+
+-- ตรวจสอบผู้เล่นใหม่
+Players.PlayerAdded:Connect(function(player)
+	player.CharacterAdded:Connect(function()
+		if ESP_Enabled then
+			CreateESP(player)
+		end
+	end)
+end)
+
+RunService.RenderStepped:Connect(function()
+	if not ESP_Enabled then return end
+	for _, player in pairs(Players:GetPlayers()) do
+		if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+			if not ESPGuiPool[player] then
+				CreateESP(player)
+			end
+		end
+	end
+end)
+
+-- ===================== แท็บ PVP =====================
+local PVPTab = Windows:NewTab({Title = "โหมด PVP", Description = "แท็บสำหรับโหมด PVP", Icon = "rbxassetid://6035047374"})
+local PVPSection = PVPTab:NewSection({Title = "โหมด PVP", Icon = "rbxassetid://6035047374", Position = "Left"})
+
+PVPSection:NewButton({
+	Title = "รันสคริปต์ล็อกหัว",
+	Callback = function()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/Project-bithub/Sjsj88/refs/heads/main/lua",true))()
+		Notification.new({
+			Title = "Malware-free",
+			Description = "สคริปต์ล็อกหัวถูกโหลดแล้ว",
+			Duration = 5,
+			Icon = "rbxassetid://8997385628"
+		})
+	end
+})
